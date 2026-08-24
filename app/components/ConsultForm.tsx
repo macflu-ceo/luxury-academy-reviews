@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type { Content } from "@/lib/types";
+import type { Page } from "@/lib/types";
 
-type Props = { form: Content["form"] };
+type Props = { form: Page["form"]; pageSlug: string };
 
 function formatPhone(raw: string): string {
   const d = raw.replace(/\D/g, "").slice(0, 11);
@@ -13,7 +13,7 @@ function formatPhone(raw: string): string {
   return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
 }
 
-export default function ConsultForm({ form }: Props) {
+export default function ConsultForm({ form, pageSlug }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [capital, setCapital] = useState("");
@@ -38,6 +38,7 @@ export default function ConsultForm({ form }: Props) {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
+          page: pageSlug,
           name: name.trim(),
           phone,
           capital,

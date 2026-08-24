@@ -1,20 +1,18 @@
 /**
- * 후기 내용과 상담신청을 저장한다.
+ * 후기 페이지들과 상담신청을 저장한다.
  *
  * - Vercel: Blob 스토어에 JSON으로 저장한다 (BLOB_READ_WRITE_TOKEN 이 있을 때).
- *   파일 이름에 임의 문자열이 붙어 주소를 추측할 수 없고, 읽고 쓰는 데는 토큰이 필요하다.
+ *   경로를 reviews/ 아래로 분리해 두어 다른 프로젝트와 스토어를 같이 써도 섞이지 않는다.
  * - 로컬: .data/ 폴더에 파일로 저장한다. 아무 설정 없이 npm run dev 가 바로 돌아간다.
  *
- * 구글시트 연동은 나중에 이 파일의 함수 네 개(getContent/saveContent/addConsult/listConsults)만
- * 바꿔 끼우면 된다. 나머지 코드는 손댈 필요가 없다.
+ * 다른 저장소로 옮기려면 아래 네 함수만 바꿔 끼우면 된다.
  */
 import fs from "fs/promises";
 import path from "path";
 import { del, list, put } from "@vercel/blob";
-import { Consult, Content, DEFAULT_CONTENT } from "./types";
+import { Consult, DEFAULT_PAGE, Page } from "./types";
 
-// Blob 스토어를 다른 프로젝트와 같이 써도 섞이지 않도록 경로를 분리한다.
-const CONTENT_KEY = "reviews/data/content";
+const PAGES_KEY = "reviews/data/pages";
 const CONSULT_KEY = "reviews/data/consults";
 
 function useBlob(): boolean {
@@ -42,9 +40,7 @@ async function blobWrite(prefix: string, value: unknown): Promise<void> {
     contentType: "application/json",
   });
   // 새 파일을 쓴 뒤에 이전 파일을 지운다 (중간에 실패해도 데이터가 남도록)
-  if (blobs.length) {
-    await del(blobs.map((b) => b.url)).catch(() => {});
-  }
+  if (blobs.length) await del(blobs.map((b) => b.url)).catch(() => {});
 }
 
 /* ────────────── 로컬 파일 ────────────── */
@@ -64,33 +60,59 @@ async function fileWrite(name: string, value: unknown): Promise<void> {
   await fs.writeFile(path.join(DATA_DIR, name), JSON.stringify(value, null, 2), "utf8");
 }
 
-/* ────────────── 후기 내용 ────────────── */
+/* ────────────── 후기 페이지 ────────────── */
 
-export async function getContent(): Promise<Content> {
+function normalize(raw: unknown): Page[] {
+  if (Array.isArray(raw)) {
+    return raw.map((p, i) => ({
+      ...DEFAULT_PAGE,
+      ...(p as Partial<Page>),
+      id: (p as Page).id || `p${i + 1}`,
+    }));
+  }
+  // 페이지가 하나뿐이던 예전 형식을 목록으로 올린다
+  if (raw && typeof raw === "object") {
+    return [{ ...DEFAULT_PAGE, ...(raw as Partial<Page>) }];
+  }
+  return [DEFAULT_PAGE];
+}
+
+export async function getPages(): Promise<Page[]> {
   try {
-    const saved = useBlob()
-      ? await blobRead<Partial<Content> | null>(CONTENT_KEY, null)
-      : await fileRead<Partial<Content> | null>("content.json", null);
-    return saved ? { ...DEFAULT_CONTENT, ...saved } : DEFAULT_CONTENT;
+    const raw = useBlob()
+      ? await blobRead<unknown>(PAGES_KEY, null)
+      : await fileRead<unknown>("pages.json", null);
+    return raw ? normalize(raw) : [DEFAULT_PAGE];
   } catch (e) {
-    console.error("[store] 후기 내용을 불러오지 못했습니다:", e);
-    return DEFAULT_CONTENT;
+    console.error("[store] 후기 페이지를 불러오지 못했습니다:", e);
+    return [DEFAULT_PAGE];
   }
 }
 
-export async function saveContent(content: Content): Promise<void> {
-  if (useBlob()) await blobWrite(CONTENT_KEY, content);
-  else await fileWrite("content.json", content);
+export async function savePages(pages: Page[]): Promise<void> {
+  if (useBlob()) await blobWrite(PAGES_KEY, pages);
+  else await fileWrite("pages.json", pages);
+}
+
+export async function getPageBySlug(slug: string): Promise<Page | null> {
+  const pages = await getPages();
+  return pages.find((p) => p.slug === slug) || null;
+}
+
+/** 가장 나중에 만든 페이지. 주소 없이 접속했을 때 보여준다. */
+export async function getLatestPage(): Promise<Page | null> {
+  const pages = await getPages();
+  return pages.length ? pages[pages.length - 1] : null;
 }
 
 /* ────────────── 상담신청 ────────────── */
 
 export async function listConsults(): Promise<Consult[]> {
   try {
-    const list_ = useBlob()
+    const rows = useBlob()
       ? await blobRead<Consult[]>(CONSULT_KEY, [])
       : await fileRead<Consult[]>("consults.json", []);
-    return Array.isArray(list_) ? list_ : [];
+    return Array.isArray(rows) ? rows : [];
   } catch (e) {
     console.error("[store] 상담신청을 불러오지 못했습니다:", e);
     return [];

@@ -16,10 +16,7 @@ export default async function ConsultsPage() {
           </div>
           <div className="admin-actions">
             <Link className="btn" href="/admin">
-              후기 편집
-            </Link>
-            <Link className="btn" href="/" target="_blank">
-              페이지 보기
+              후기 페이지 목록
             </Link>
           </div>
         </div>
@@ -35,6 +32,7 @@ export default async function ConsultsPage() {
                 <thead>
                   <tr>
                     <th>신청일시</th>
+                    <th>페이지</th>
                     <th>이름</th>
                     <th>전화번호</th>
                     <th>자본금 규모</th>
@@ -45,6 +43,7 @@ export default async function ConsultsPage() {
                   {rows.map((r, i) => (
                     <tr key={`${r.createdAt}-${i}`}>
                       <td>{r.createdAt}</td>
+                      <td>{r.page ? `/${r.page}` : "-"}</td>
                       <td>{r.name}</td>
                       <td>
                         <a href={`tel:${r.phone.replace(/\D/g, "")}`}>{r.phone}</a>

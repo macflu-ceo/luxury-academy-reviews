@@ -10,7 +10,13 @@ export type Entry = {
   margin: string;
 };
 
-export type Content = {
+export type Page = {
+  /** 내부 식별자 */
+  id: string;
+  /** 주소에 쓰이는 이름. 예) 2026-08 → /2026-08 */
+  slug: string;
+  /** 마지막 저장 시각 */
+  updatedAt: string;
   /** 글 맨 위 날짜 표기 (예: 2026년 8월) */
   date: string;
   /** 전체 제목 */
@@ -39,13 +45,18 @@ export type Content = {
 
 export type Consult = {
   createdAt: string;
+  /** 어느 후기 페이지에서 신청했는지 */
+  page: string;
   name: string;
   phone: string;
   capital: string;
   source: string;
 };
 
-export const DEFAULT_CONTENT: Content = {
+export const DEFAULT_PAGE: Page = {
+  id: "p1",
+  slug: "2026-08",
+  updatedAt: "",
   date: "2026년 8월",
   title: "명품창업사관학교 후기",
   lead: "이번 달에 새로 시작하신 분들의 이야기를 모았습니다. 홍보용으로 다듬지 않고, 시작한 날부터 지금까지 있었던 일을 그대로 옮겼습니다.",
@@ -100,3 +111,31 @@ export const DEFAULT_CONTENT: Content = {
   fixedCta: true,
   footer: "명품창업사관학교",
 };
+
+/** 새 후기 페이지 한 장을 만든다. */
+export function blankPage(): Page {
+  const id = `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  return {
+    ...DEFAULT_PAGE,
+    id,
+    slug: `r-${Math.random().toString(36).slice(2, 8)}`,
+    updatedAt: "",
+    title: "",
+    lead: "",
+    cover: "",
+    entries: [
+      { id: `e${Math.random().toString(36).slice(2, 8)}`, title: "", image: "", body: "", supply: "", retail: "", margin: "" },
+    ],
+  };
+}
+
+/** 주소에 쓸 수 있는 형태로 다듬는다. */
+export function cleanSlug(raw: string): string {
+  return (raw || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 40);
+}

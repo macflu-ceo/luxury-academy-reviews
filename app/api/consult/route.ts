@@ -4,7 +4,7 @@ import { addConsult } from "@/lib/store";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  let body: { name?: string; phone?: string; capital?: string; source?: string };
+  let body: { name?: string; phone?: string; capital?: string; source?: string; page?: string };
   try {
     body = await req.json();
   } catch {
@@ -15,6 +15,7 @@ export async function POST(req: Request) {
   const phone = (body.phone || "").trim().slice(0, 20);
   const capital = (body.capital || "").trim().slice(0, 30);
   const source = (body.source || "").trim().slice(0, 60);
+  const page = (body.page || "").trim().slice(0, 60);
 
   if (!name) return NextResponse.json({ error: "이름을 입력해 주세요." }, { status: 400 });
   if (phone.replace(/\D/g, "").length < 10)
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
   try {
     await addConsult({
       createdAt: new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
+      page,
       name,
       phone,
       capital,
