@@ -87,7 +87,13 @@ export const DEFAULT_CONTENT: Content = {
   form: {
     title: "상담 신청",
     note: "남겨주시면 담당자가 순서대로 연락드립니다. 영업일 기준 1일 이내입니다.",
-    capitalOptions: ["1천만원", "3천만원", "5천만원", "1억"],
+    capitalOptions: [
+      "1천만원 이하",
+      "1천만원~3천만원",
+      "3천만원~5천만원",
+      "5천만원~1억",
+      "1억 이상",
+    ],
     privacyText: "상담 연락을 위한 개인정보 수집·이용에 동의합니다.",
     doneText: "신청이 접수됐습니다. 순서대로 연락드리겠습니다.",
   },
