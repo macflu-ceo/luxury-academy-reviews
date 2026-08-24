@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
   try {
     if (process.env.BLOB_READ_WRITE_TOKEN) {
-      const blob = await put(`images/${name}`, file, {
+      const blob = await put(`reviews/images/${name}`, file, {
         access: "public",
         contentType: file.type,
       });

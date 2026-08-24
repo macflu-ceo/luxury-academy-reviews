@@ -13,8 +13,9 @@ import path from "path";
 import { del, list, put } from "@vercel/blob";
 import { Consult, Content, DEFAULT_CONTENT } from "./types";
 
-const CONTENT_KEY = "data/content";
-const CONSULT_KEY = "data/consults";
+// Blob 스토어를 다른 프로젝트와 같이 써도 섞이지 않도록 경로를 분리한다.
+const CONTENT_KEY = "reviews/data/content";
+const CONSULT_KEY = "reviews/data/consults";
 
 function useBlob(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);

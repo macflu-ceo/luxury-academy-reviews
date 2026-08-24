@@ -45,9 +45,9 @@ Blob 스토어를 연결해야 후기 내용·상담신청·사진이 저장된�
 
 | 항목 | 저장 위치 |
 | --- | --- |
-| 후기 내용 (제목·소개·후기글·폼 설정) | Blob `data/content-*.json` |
-| 상담신청 (이름·전화번호·자본금 규모) | Blob `data/consults-*.json` |
-| 업로드한 사진 | Blob `images/*` |
+| 후기 내용 (제목·소개·후기글·폼 설정) | Blob `reviews/data/content-*.json` |
+| 상담신청 (이름·전화번호·자본금 규모) | Blob `reviews/data/consults-*.json` |
+| 업로드한 사진 | Blob `reviews/images/*` |
 
 구글시트로 옮기려면 `lib/store.ts` 의 네 함수
 (`getContent` / `saveContent` / `addConsult` / `listConsults`) 만 바꿔 끼우면 된다.
