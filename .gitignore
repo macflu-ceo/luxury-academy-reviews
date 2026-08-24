@@ -6,7 +6,7 @@ out
 *.tsbuildinfo
 next-env.d.ts
 
-# 로컬 개발용 데이터 (구글시트 대신 파일로 저장될 때)
+# 로컬 개발용 데이터 (배포 환경에서는 Vercel Blob 을 쓴다)
 .data
 public/uploads
 
