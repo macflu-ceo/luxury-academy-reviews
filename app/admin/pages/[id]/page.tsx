@@ -12,6 +12,7 @@ function newEntry(): Entry {
   return {
     id: `e${Math.random().toString(36).slice(2, 8)}`,
     title: "",
+    brand: "",
     productImage: "",
     image: "",
     body: "",
@@ -331,6 +332,17 @@ export default function EditPage() {
                       placeholder="예) 퇴근 후 하루 2시간, 4개월 만에 월 매출 1,870만원"
                       onChange={(ev) => patchEntry(i, { title: ev.target.value })}
                     />
+                  </div>
+
+                  <div className="field">
+                    <label>브랜드</label>
+                    <input
+                      type="text"
+                      value={e.brand}
+                      placeholder="셀린느"
+                      onChange={(ev) => patchEntry(i, { brand: ev.target.value })}
+                    />
+                    <span className="sub">상품 사진 왼쪽 위 동그라미에 표시됩니다. 비우면 안 나옵니다.</span>
                   </div>
 
                   <div className="row two">

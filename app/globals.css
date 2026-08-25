@@ -75,8 +75,9 @@ p{margin:0}
 .figs{display:grid; gap:14px; margin:24px 0}
 .fig{margin:0; border:1px solid var(--rule); border-radius:3px; overflow:hidden;
   background:var(--surface-2)}
-.fig-btn{display:block; width:100%; padding:0; border:0; background:none;
-  cursor:zoom-in; position:relative; line-height:0}
+/* 버튼이 사진 크기에 딱 맞아야 브랜드 표시와 확대 아이콘이 사진 모서리에 붙는다 */
+.fig-btn{display:block; width:fit-content; max-width:100%; margin:0 auto;
+  padding:0; border:0; background:none; cursor:zoom-in; position:relative; line-height:0}
 .fig img{display:block; width:auto; max-width:100%; max-height:52vh; margin:0 auto}
 .figs:not(.one) .fig img{max-height:38vh}
 .fig .zoom{position:absolute; right:8px; bottom:8px; width:26px; height:26px;
@@ -323,3 +324,15 @@ table.list td{font-variant-numeric:tabular-nums}
 body.consult-done .closing,
 body.consult-done .stickycta,
 body.consult-done .sticky-space{display:none}
+
+/* 상품 사진 왼쪽 위 브랜드 표시 */
+.brand-mark{
+  position:absolute; top:10px; left:10px; z-index:2;
+  width:58px; height:58px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  background:var(--paper); color:var(--ink); border:1px solid var(--gold);
+  font-family:var(--display); font-size:.75rem; font-weight:700; line-height:1.25;
+  letter-spacing:-.01em; word-break:keep-all; padding:6px;
+  box-shadow:0 2px 10px -4px rgba(0,0,0,.35);
+}
+@media (min-width:760px){ .brand-mark{width:64px; height:64px; font-size:.8125rem} }

@@ -11,10 +11,12 @@ type Shot = { src: string; caption: string; kind: "product" | "receipt" };
 export default function Figures({
   product,
   receipt,
+  brand,
   alt,
 }: {
   product: string;
   receipt: string;
+  brand: string;
   alt: string;
 }) {
   const [open, setOpen] = useState<Shot | null>(null);
@@ -55,6 +57,7 @@ export default function Figures({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={s.src} alt={`${alt} ${s.caption}`} />
+              {brand && s === shots[0] ? <span className="brand-mark">{brand}</span> : null}
               <span className="zoom" aria-hidden="true">
                 ⤢
               </span>

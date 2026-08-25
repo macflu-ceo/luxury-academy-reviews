@@ -68,7 +68,12 @@ export default function ReviewArticle({ page }: { page: Page }) {
           {page.entries.map((e) => (
             <section className="entry" key={e.id}>
               {e.title ? <h2>{e.title}</h2> : null}
-              <Figures product={e.productImage} receipt={e.image} alt={e.title} />
+              <Figures
+                product={e.productImage}
+                receipt={e.image}
+                brand={e.brand}
+                alt={e.title}
+              />
               <Spec supply={e.supply} retail={e.retail} margin={e.margin} />
               <Prose text={e.body} />
             </section>

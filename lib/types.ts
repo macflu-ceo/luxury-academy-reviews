@@ -1,6 +1,8 @@
 export type Entry = {
   id: string;
   title: string;
+  /** 상품 사진 왼쪽 위 동그라미에 표시할 브랜드. 비우면 표시하지 않는다. */
+  brand: string;
   /** 상품 사진 */
   productImage: string;
   /** 판매 내역 사진 (주문서 캡처 등) */
@@ -68,6 +70,7 @@ export const DEFAULT_PAGE: Page = {
     {
       id: "e1",
       title: "퇴근 후 하루 2시간, 4개월 만에 월 매출 1,870만원",
+      brand: "셀린느",
       productImage: "",
       image: "",
       supply: "2450000",
@@ -78,6 +81,7 @@ export const DEFAULT_PAGE: Page = {
     {
       id: "e2",
       title: "카페를 접고 다시 창업했습니다, 이번엔 재고가 없습니다",
+      brand: "프라다",
       productImage: "",
       image: "",
       supply: "1780000",
@@ -88,6 +92,7 @@ export const DEFAULT_PAGE: Page = {
     {
       id: "e3",
       title: "아이 둘 키우면서, 하루 한 시간으로 만든 두 번째 수입",
+      brand: "",
       productImage: "",
       image: "",
       supply: "",
@@ -133,6 +138,7 @@ export function blankPage(): Page {
       {
         id: `e${Math.random().toString(36).slice(2, 8)}`,
         title: "",
+        brand: "",
         productImage: "",
         image: "",
         body: "",
