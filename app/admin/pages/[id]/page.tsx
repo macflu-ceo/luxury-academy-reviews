@@ -267,11 +267,12 @@ export default function EditPage() {
                 <label htmlFor="lead">제목 밑 소개 내용</label>
                 <textarea
                   id="lead"
-                  style={{ minHeight: 90 }}
+                  style={{ minHeight: 140 }}
                   value={c.lead}
                   placeholder="이 페이지가 어떤 글인지 두세 문장으로"
                   onChange={(e) => patch({ lead: e.target.value })}
                 />
+                <span className="sub">빈 줄 하나를 넣으면 문단이 나뉩니다.</span>
               </div>
               {imageRow("대표 사진", c.cover, "cover")}
             </div>

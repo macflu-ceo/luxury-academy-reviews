@@ -2,10 +2,11 @@ import type { Page } from "@/lib/types";
 import { money, resolveMargin } from "@/lib/money";
 import ConsultForm from "./ConsultForm";
 
-function Prose({ text }: { text: string }) {
+function Prose({ text, className }: { text: string; className?: string }) {
   const blocks = text.trim().split(/\n{2,}/).filter(Boolean);
+  if (!blocks.length) return null;
   return (
-    <div className="prose">
+    <div className={className ? `prose ${className}` : "prose"}>
       {blocks.map((b, i) => (
         <p key={i}>
           {b.split("\n").map((line, j, arr) => (
@@ -49,7 +50,7 @@ export default function ReviewArticle({ page }: { page: Page }) {
         <header className="post-head page">
           {page.date ? <div className="datemark">{page.date}</div> : null}
           <h1>{page.title}</h1>
-          {page.lead ? <p className="lead">{page.lead}</p> : null}
+          <Prose text={page.lead} className="lead" />
           <div className="head-rule" />
         </header>
 
@@ -80,7 +81,7 @@ export default function ReviewArticle({ page }: { page: Page }) {
           {page.closing.headline || page.closing.body ? (
             <section className="closing">
               {page.closing.headline ? <h2>{page.closing.headline}</h2> : null}
-              {page.closing.body ? <p className="txt">{page.closing.body}</p> : null}
+              <Prose text={page.closing.body} className="txt" />
               {page.closing.ctaLabel ? (
                 <a className="cta" href="#consult">
                   {page.closing.ctaLabel}
