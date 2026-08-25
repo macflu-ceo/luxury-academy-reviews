@@ -25,7 +25,7 @@ function Spec({ supply, retail, margin }: { supply: string; retail: string; marg
   const rows = [
     { k: "공급가", v: money(supply) },
     { k: "정가", v: money(retail) },
-    { k: "마진", v: resolveMargin(supply, retail, margin), accent: true },
+    { k: "차액", v: resolveMargin(supply, retail, margin), accent: true },
   ].filter((r) => r.v);
 
   if (!rows.length) return null;
@@ -38,6 +38,27 @@ function Spec({ supply, retail, margin }: { supply: string; retail: string; marg
         </div>
       ))}
     </dl>
+  );
+}
+
+/** 상품 사진과 판매 내역을 같은 틀에 나란히 놓는다. 한 장만 있으면 그 장이 폭을 다 쓴다. */
+function Figures({ product, receipt, alt }: { product: string; receipt: string; alt: string }) {
+  const shots = [
+    { src: product, caption: "상품", kind: "product" },
+    { src: receipt, caption: "판매 내역", kind: "receipt" },
+  ].filter((f) => f.src);
+
+  if (!shots.length) return null;
+  return (
+    <div className={shots.length === 1 ? "figs one" : "figs"}>
+      {shots.map((f) => (
+        <figure className={`fig ${f.kind}`} key={f.caption}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={f.src} alt={`${alt} ${f.caption}`} />
+          <figcaption>{f.caption}</figcaption>
+        </figure>
+      ))}
+    </div>
   );
 }
 
@@ -67,12 +88,7 @@ export default function ReviewArticle({ page }: { page: Page }) {
           {page.entries.map((e) => (
             <section className="entry" key={e.id}>
               {e.title ? <h2>{e.title}</h2> : null}
-              {e.image ? (
-                <div className="entry-img">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={e.image} alt={e.title} />
-                </div>
-              ) : null}
+              <Figures product={e.productImage} receipt={e.image} alt={e.title} />
               <Spec supply={e.supply} retail={e.retail} margin={e.margin} />
               <Prose text={e.body} />
             </section>

@@ -14,7 +14,7 @@ export function num(raw: string): number | null {
   return Number(digits);
 }
 
-/** 마진을 직접 적었으면 그 값, 비워뒀으면 정가 - 공급가. */
+/** 차액을 직접 적었으면 그 값, 비워뒀으면 정가 - 공급가. */
 export function resolveMargin(supply: string, retail: string, margin: string): string {
   if (margin && margin.trim()) return money(margin);
   const s = num(supply);

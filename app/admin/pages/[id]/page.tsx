@@ -6,10 +6,13 @@ import { useEffect, useRef, useState } from "react";
 import type { Entry, Page } from "@/lib/types";
 import { resolveMargin } from "@/lib/money";
 
+type ImgKind = "cover" | "product" | "receipt";
+
 function newEntry(): Entry {
   return {
     id: `e${Math.random().toString(36).slice(2, 8)}`,
     title: "",
+    productImage: "",
     image: "",
     body: "",
     supply: "",
@@ -26,7 +29,7 @@ export default function EditPage() {
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string>("");
-  const fileTarget = useRef<{ kind: "cover" | "entry"; index: number } | null>(null);
+  const fileTarget = useRef<{ kind: ImgKind; index: number } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -66,7 +69,7 @@ export default function EditPage() {
     patch({ entries: c.entries.filter((_, k) => k !== i) });
   }
 
-  function pickImage(kind: "cover" | "entry", index = -1) {
+  function pickImage(kind: ImgKind, index = -1) {
     fileTarget.current = { kind, index };
     fileInput.current?.click();
   }
@@ -77,7 +80,7 @@ export default function EditPage() {
     const target = fileTarget.current;
     if (!file || !target) return;
 
-    setUploading(target.kind === "cover" ? "cover" : `e${target.index}`);
+    setUploading(target.kind === "cover" ? "cover" : `${target.kind}${target.index}`);
     setMsg("");
     try {
       const fd = new FormData();
@@ -86,6 +89,7 @@ export default function EditPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "사진을 올리지 못했습니다.");
       if (target.kind === "cover") patch({ cover: data.url });
+      else if (target.kind === "product") patchEntry(target.index, { productImage: data.url });
       else patchEntry(target.index, { image: data.url });
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "사진을 올리지 못했습니다.");
@@ -135,8 +139,8 @@ export default function EditPage() {
     );
   }
 
-  const imageRow = (label: string, url: string, kind: "cover" | "entry", index = -1) => {
-    const key = kind === "cover" ? "cover" : `e${index}`;
+  const imageRow = (label: string, hint: string, url: string, kind: ImgKind, index = -1) => {
+    const key = kind === "cover" ? "cover" : `${kind}${index}`;
     return (
       <div className="field">
         <label>{label}</label>
@@ -162,14 +166,16 @@ export default function EditPage() {
                   type="button"
                   className="btn sm ghost danger"
                   onClick={() =>
-                    kind === "cover" ? patch({ cover: "" }) : patchEntry(index, { image: "" })
+                    kind === "cover"
+                      ? patch({ cover: "" })
+                      : patchEntry(index, kind === "product" ? { productImage: "" } : { image: "" })
                   }
                 >
                   제거
                 </button>
               ) : null}
             </div>
-            <span className="fn">가로가 긴 사진 권장 · 8MB 이하</span>
+            <span className="fn">{hint}</span>
           </div>
         </div>
       </div>
@@ -274,7 +280,7 @@ export default function EditPage() {
                 />
                 <span className="sub">빈 줄 하나를 넣으면 문단이 나뉩니다.</span>
               </div>
-              {imageRow("대표 사진", c.cover, "cover")}
+              {imageRow("대표 사진", "글 맨 위에 크게 들어갑니다 · 8MB 이하", c.cover, "cover")}
             </div>
           </fieldset>
 
@@ -282,8 +288,8 @@ export default function EditPage() {
           <fieldset>
             <legend>후기글</legend>
             <p className="hint">
-              후기글 하나 = 제목 + 사진 + 공급가·정가·마진 + 내용. 금액은 비워두면 그 후기에는
-              표시되지 않습니다.
+              후기글 하나 = 제목 + 사진 두 장(상품·판매 내역) + 공급가·정가·차액 + 내용. 사진과
+              금액은 비워두면 그 후기에서 빠집니다.
             </p>
 
             {c.entries.map((e, i) => (
@@ -327,7 +333,10 @@ export default function EditPage() {
                     />
                   </div>
 
-                  {imageRow("사진", e.image, "entry", i)}
+                  <div className="row two">
+                    {imageRow("상품 사진", "판매한 상품 사진", e.productImage, "product", i)}
+                    {imageRow("판매 내역 사진", "주문서 캡처 등", e.image, "receipt", i)}
+                  </div>
 
                   <div className="row three-money">
                     <div className="field">
@@ -351,7 +360,7 @@ export default function EditPage() {
                       />
                     </div>
                     <div className="field">
-                      <label>마진</label>
+                      <label>차액</label>
                       <input
                         type="text"
                         inputMode="numeric"

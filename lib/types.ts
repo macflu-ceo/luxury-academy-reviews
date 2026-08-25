@@ -1,6 +1,9 @@
 export type Entry = {
   id: string;
   title: string;
+  /** 상품 사진 */
+  productImage: string;
+  /** 판매 내역 사진 (주문서 캡처 등) */
   image: string;
   body: string;
   /** 공급가 / 정가 / 마진. 셋 다 비우면 해당 후기에는 표시되지 않는다. */
@@ -65,6 +68,7 @@ export const DEFAULT_PAGE: Page = {
     {
       id: "e1",
       title: "퇴근 후 하루 2시간, 4개월 만에 월 매출 1,870만원",
+      productImage: "",
       image: "",
       supply: "2450000",
       retail: "3900000",
@@ -74,6 +78,7 @@ export const DEFAULT_PAGE: Page = {
     {
       id: "e2",
       title: "카페를 접고 다시 창업했습니다, 이번엔 재고가 없습니다",
+      productImage: "",
       image: "",
       supply: "1780000",
       retail: "2690000",
@@ -83,6 +88,7 @@ export const DEFAULT_PAGE: Page = {
     {
       id: "e3",
       title: "아이 둘 키우면서, 하루 한 시간으로 만든 두 번째 수입",
+      productImage: "",
       image: "",
       supply: "",
       retail: "",
@@ -124,7 +130,16 @@ export function blankPage(): Page {
     lead: "",
     cover: "",
     entries: [
-      { id: `e${Math.random().toString(36).slice(2, 8)}`, title: "", image: "", body: "", supply: "", retail: "", margin: "" },
+      {
+        id: `e${Math.random().toString(36).slice(2, 8)}`,
+        title: "",
+        productImage: "",
+        image: "",
+        body: "",
+        supply: "",
+        retail: "",
+        margin: "",
+      },
     ],
   };
 }
