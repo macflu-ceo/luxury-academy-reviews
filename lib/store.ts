@@ -107,7 +107,13 @@ export async function savePages(pages: Page[]): Promise<void> {
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
   const pages = await getPages();
-  return pages.find((p) => p.slug === slug) || null;
+  const hit = pages.find((p) => p.slug === slug);
+  if (hit) return hit;
+
+  // 저장소를 못 읽은 상태라면 404 를 내지 않는다.
+  // 문자로 받은 주소가 잠깐이라도 404 가 되면 그 사람은 다시 안 들어온다.
+  if (pages.length === 1 && pages[0].id === "fallback") return pages[0];
+  return null;
 }
 
 /** 가장 나중에 만든 페이지. 주소 없이 접속했을 때 보여준다. */
