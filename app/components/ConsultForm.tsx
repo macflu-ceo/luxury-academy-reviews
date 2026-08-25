@@ -51,6 +51,11 @@ export default function ConsultForm({ form, pageSlug }: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "잠시 후 다시 시도해 주세요.");
       setDone(true);
+      // 신청이 끝났으니 더 권하는 문구와 버튼은 걷어낸다
+      document.body.classList.add("consult-done");
+      requestAnimationFrame(() =>
+        document.getElementById("consult")?.scrollIntoView({ block: "center" }),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "잠시 후 다시 시도해 주세요.");
     } finally {
@@ -64,8 +69,7 @@ export default function ConsultForm({ form, pageSlug }: Props) {
         {done ? (
           <div className="done">
             <div className="mark">✓</div>
-            <h2>신청이 접수됐습니다</h2>
-            <p>{form.doneText}</p>
+            <h2>{form.doneText}</h2>
           </div>
         ) : (
           <>

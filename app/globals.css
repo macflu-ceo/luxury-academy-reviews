@@ -119,8 +119,8 @@ p{margin:0}
 .done .mark{width:52px; height:52px; margin:0 auto 18px; border-radius:50%;
   background:var(--accent-soft); color:var(--accent-ink);
   display:flex; align-items:center; justify-content:center; font-size:26px}
-.done h2{font-size:var(--s1)}
-.done p{margin-top:10px; font-size:var(--s-1); color:var(--ink-3)}
+.done h2{font-size:var(--s1); line-height:1.6; word-break:keep-all;
+  max-width:24ch; margin:0 auto; color:var(--ink)}
 
 .stickycta{position:fixed; left:0; right:0; bottom:0; z-index:60;
   padding:10px 12px calc(10px + env(safe-area-inset-bottom));
@@ -275,3 +275,8 @@ table.list td{font-variant-numeric:tabular-nums}
   .page-card .thumb{width:100%; height:130px}
   .page-card-acts .btn{flex:1 1 auto}
 }
+
+/* 상담신청이 끝나면 더 권하는 문구와 버튼을 감춘다 */
+body.consult-done .closing,
+body.consult-done .stickycta,
+body.consult-done .sticky-space{display:none}
