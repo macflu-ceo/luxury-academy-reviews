@@ -70,14 +70,42 @@ p{margin:0}
   word-break:keep-all}
 .entry h2::before{content:""; display:block; width:38px; height:3px; border-radius:2px;
   background:var(--accent); margin-bottom:18px}
-.figs{display:grid; gap:12px; margin:24px calc(-1 * var(--pad))}
-.fig{margin:0; background:var(--surface-2); overflow:hidden}
-.fig img{width:100%; object-fit:contain; display:block}
-/* 사진 성격에 맞춘 틀. 같은 종류끼리는 항상 같은 크기가 된다. */
-.fig.product img{aspect-ratio:4/3}
-.fig.receipt img{aspect-ratio:3/4}
-.fig figcaption{font-size:.625rem; letter-spacing:.14em; color:var(--ink-3);
-  text-align:center; padding:9px 10px 12px; border-top:1px solid var(--rule)}
+/* 사진은 원본 비율 그대로 둔다. 틀을 강제하면 넓은 캡처가 빈 상자에 갇힌다.
+   대신 너무 커지지 않게 높이만 제한하고, 누르면 원본 전체를 크게 띄운다. */
+.figs{display:grid; gap:14px; margin:24px 0}
+.fig{margin:0; border:1px solid var(--rule); border-radius:3px; overflow:hidden;
+  background:var(--surface-2)}
+.fig-btn{display:block; width:100%; padding:0; border:0; background:none;
+  cursor:zoom-in; position:relative; line-height:0}
+.fig img{display:block; width:auto; max-width:100%; max-height:52vh; margin:0 auto}
+.figs:not(.one) .fig img{max-height:38vh}
+.fig .zoom{position:absolute; right:8px; bottom:8px; width:26px; height:26px;
+  display:flex; align-items:center; justify-content:center; border-radius:50%;
+  background:color-mix(in srgb, var(--ink) 62%, transparent); color:#fff;
+  font-size:12px; line-height:1}
+.fig figcaption{font-size:.625rem; letter-spacing:.12em; color:var(--ink-3);
+  text-align:center; padding:8px 6px 9px; border-top:1px solid var(--rule); line-height:1.4}
+
+.lightbox{position:fixed; inset:0; z-index:200; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:14px; padding:44px 14px 28px;
+  background:rgba(12,10,9,.94); cursor:zoom-out}
+.lightbox-stage{max-width:100%; max-height:calc(100vh - 130px); overflow:auto;
+  -webkit-overflow-scrolling:touch; cursor:default; border-radius:3px; background:#fff}
+/* 원본 크기로 보여주고, 화면보다 넓으면 좌우로 밀어서 읽는다 */
+.lightbox-stage img{display:block; width:auto; max-width:none;
+  max-height:calc(100vh - 130px); margin:0 auto}
+.lightbox-cap{font-size:.6875rem; letter-spacing:.06em; color:rgba(255,255,255,.62)}
+.lightbox-close{position:absolute; top:12px; right:12px; width:38px; height:38px;
+  border-radius:50%; border:0; background:rgba(255,255,255,.14); color:#fff;
+  font-size:16px; cursor:pointer}
+
+@media (min-width:760px){
+  /* 넓은 화면에서는 두 장을 나란히 */
+  .figs{grid-template-columns:1fr 1fr; align-items:start; gap:16px}
+  .figs.one{grid-template-columns:1fr; max-width:560px}
+  .fig img{max-height:44vh}
+}
+
 .prose{margin-top:22px}
 .prose p{margin:0 0 1.15em; color:var(--ink-2); font-weight:300;
   font-size:1.0625rem; line-height:1.85; word-break:keep-all}
@@ -94,14 +122,6 @@ p{margin:0}
 .cta{display:inline-block; margin-top:28px; text-decoration:none; background:var(--accent); color:#fff;
   font-weight:600; font-size:var(--s0); padding:15px 34px; border-radius:999px}
 
-@media (min-width:480px){
-  /* 나란히 놓을 때는 두 장의 높이를 맞춘다 */
-  .figs{grid-template-columns:1fr 1fr; gap:10px; align-items:stretch}
-  .figs.one{grid-template-columns:1fr}
-  .fig{display:flex; flex-direction:column}
-  .fig img,.fig.product img,.fig.receipt img{flex:1; min-height:0; aspect-ratio:3/4}
-  .figs.one .fig.product img{aspect-ratio:4/3}
-}
 @media (min-width:760px){
   .hero-img{border-radius:3px}
   .hero-img img{aspect-ratio:16/9}
