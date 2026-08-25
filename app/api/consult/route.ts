@@ -23,21 +23,15 @@ export async function POST(req: Request) {
   if (!capital)
     return NextResponse.json({ error: "자본금 규모를 선택해 주세요." }, { status: 400 });
 
-  try {
-    await addConsult({
-      createdAt: new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
-      page,
-      name,
-      phone,
-      capital,
-      source,
-    });
-    return NextResponse.json({ ok: true });
-  } catch (e) {
-    console.error("[consult] 저장 실패:", e);
-    return NextResponse.json(
-      { error: "접수 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요." },
-      { status: 500 },
-    );
-  }
+  const stored = await addConsult({
+    createdAt: new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
+    page,
+    name,
+    phone,
+    capital,
+    source,
+  });
+
+  // 저장에 실패해도 신청자에게는 접수로 알린다. 내용은 로그에 [LEAD] 로 남아 있다.
+  return NextResponse.json({ ok: true, stored });
 }

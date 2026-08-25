@@ -160,3 +160,20 @@ export function cleanSlug(raw: string): string {
     .replace(/^-|-$/g, "")
     .slice(0, 40);
 }
+
+/**
+ * 저장소가 안 붙었을 때 배포 환경에서 대신 보여줄 페이지.
+ * 지어낸 후기 대신 상담신청 폼만 남긴다.
+ */
+export const FALLBACK_PAGE: Page = {
+  ...DEFAULT_PAGE,
+  id: "fallback",
+  slug: "",
+  date: "",
+  title: "명품창업사관학교 상담 신청",
+  lead: "후기를 준비하는 중입니다. 궁금하신 점은 아래로 남겨주시면 담당자가 연락드립니다.",
+  cover: "",
+  entries: [],
+  closing: { headline: "", body: "", ctaLabel: "" },
+  fixedCta: false,
+};

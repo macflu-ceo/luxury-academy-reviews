@@ -10,7 +10,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { del, list, put } from "@vercel/blob";
-import { Consult, DEFAULT_PAGE, Page } from "./types";
+import { Consult, DEFAULT_PAGE, FALLBACK_PAGE, Page } from "./types";
 
 const PAGES_KEY = "reviews/data/pages";
 const CONSULT_KEY = "reviews/data/consults";
@@ -78,14 +78,25 @@ function normalize(raw: unknown): Page[] {
 }
 
 export async function getPages(): Promise<Page[]> {
+  // 배포 환경인데 저장소가 안 붙어 있으면 샘플 후기를 보여주면 안 된다.
+  // 실제 고객이 지어낸 후기를 읽게 된다.
+  const isServerless = Boolean(process.env.VERCEL);
+  const onFailure = () => (isServerless ? [FALLBACK_PAGE] : [DEFAULT_PAGE]);
+
+  if (isServerless && !useBlob()) {
+    console.error("[store] BLOB_READ_WRITE_TOKEN 이 없습니다. 저장소가 연결되지 않았습니다.");
+    return onFailure();
+  }
+
   try {
     const raw = useBlob()
       ? await blobRead<unknown>(PAGES_KEY, null)
       : await fileRead<unknown>("pages.json", null);
-    return raw ? normalize(raw) : [DEFAULT_PAGE];
+    if (!raw) return isServerless ? onFailure() : [DEFAULT_PAGE];
+    return normalize(raw);
   } catch (e) {
     console.error("[store] 후기 페이지를 불러오지 못했습니다:", e);
-    return [DEFAULT_PAGE];
+    return onFailure();
   }
 }
 
@@ -119,9 +130,22 @@ export async function listConsults(): Promise<Consult[]> {
   }
 }
 
-export async function addConsult(c: Consult): Promise<void> {
-  const all = await listConsults();
-  all.push(c);
-  if (useBlob()) await blobWrite(CONSULT_KEY, all);
-  else await fileWrite("consults.json", all);
+/**
+ * 상담신청을 저장한다. 저장에 실패하면 예외를 던지지 않고 false 를 돌려준다.
+ * 대신 로그에 [LEAD] 로 남겨 두어 나중에 Vercel 로그에서 건져낼 수 있게 한다.
+ * 발송 중에 신청자가 오류 화면을 보고 이탈하는 것이 더 큰 손해다.
+ */
+export async function addConsult(c: Consult): Promise<boolean> {
+  // 저장 성공 여부와 무관하게 먼저 로그로 남긴다
+  console.error("[LEAD]", JSON.stringify(c));
+  try {
+    const all = await listConsults();
+    all.push(c);
+    if (useBlob()) await blobWrite(CONSULT_KEY, all);
+    else await fileWrite("consults.json", all);
+    return true;
+  } catch (e) {
+    console.error("[store] 상담신청을 저장하지 못했습니다:", e);
+    return false;
+  }
 }
