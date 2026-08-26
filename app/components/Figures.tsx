@@ -56,7 +56,7 @@ export default function Figures({
               aria-label={`${s.caption} 사진 크게 보기`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={s.src} alt={`${alt} ${s.caption}`} />
+              <img src={s.src} alt={`${alt} ${s.caption}`} loading="lazy" decoding="async" />
               {brand && s === shots[0] ? <span className="brand-mark">{brand}</span> : null}
               <span className="zoom" aria-hidden="true">
                 ⤢

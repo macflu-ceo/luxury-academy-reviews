@@ -2,8 +2,7 @@ import { notFound } from "next/navigation";
 import { getLatestPage } from "@/lib/store";
 import ReviewArticle from "./components/ReviewArticle";
 
-// 어드민에서 저장하면 바로 반영되도록 매 요청마다 그린다.
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function generateMetadata() {
   const page = await getLatestPage();

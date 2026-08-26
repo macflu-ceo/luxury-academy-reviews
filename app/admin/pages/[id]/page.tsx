@@ -8,6 +8,38 @@ import { resolveMargin } from "@/lib/money";
 
 type ImgKind = "cover" | "product" | "receipt";
 
+/**
+ * 올리기 전에 브라우저에서 사진을 줄인다.
+ * 원본 그대로 올리면 후기 한 장에 1MB가 넘어, 페이지를 여는 사람마다 그만큼 내려받는다.
+ */
+async function shrink(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  const MAX = 1400;
+
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (!bitmap) return file;
+
+  const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close?.();
+
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, "image/jpeg", 0.82),
+  );
+  if (!blob || blob.size >= file.size) return file;
+
+  const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+  return new File([blob], name, { type: "image/jpeg" });
+}
+
 function newEntry(): Entry {
   return {
     id: `e${Math.random().toString(36).slice(2, 8)}`,
@@ -85,7 +117,7 @@ export default function EditPage() {
     setMsg("");
     try {
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", await shrink(file));
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "사진을 올리지 못했습니다.");
