@@ -8,6 +8,9 @@ import { resolveMargin } from "@/lib/money";
 
 type ImgKind = "cover" | "product" | "receipt";
 
+/** 드롭다운 맨 아래 '+ 추가하기' 항목을 가리키는 값 */
+const ADD_NEW = "__add__";
+
 /**
  * 올리기 전에 브라우저에서 사진을 줄인다.
  * 원본 그대로 올리면 후기 한 장에 1MB가 넘어, 페이지를 여는 사람마다 그만큼 내려받는다.
@@ -174,6 +177,64 @@ export default function EditPage() {
       </div>
     );
   }
+
+  /**
+   * 금액 이름 드롭다운. 맨 아래 '+ 추가하기' 를 고르면 이름을 물어보고
+   * 목록에 넣어 둔다. 한 번 넣으면 다른 후기글에서도 계속 고를 수 있다.
+   */
+  const labelPick = (slot: "supply" | "retail" | "margin", index: number) => {
+    const options = c.moneyLabels[slot];
+    const entry = c.entries[index];
+    const picked =
+      slot === "supply"
+        ? entry.supplyLabel
+        : slot === "retail"
+          ? entry.retailLabel
+          : entry.marginLabel;
+    const current = picked || options[0] || "";
+
+    const setLabel = (v: string) =>
+      patchEntry(
+        index,
+        slot === "supply"
+          ? { supplyLabel: v }
+          : slot === "retail"
+            ? { retailLabel: v }
+            : { marginLabel: v },
+      );
+
+    const onChange = (v: string) => {
+      if (v !== ADD_NEW) {
+        setLabel(v);
+        return;
+      }
+      const name = window.prompt("추가할 이름을 적어주세요", "")?.trim();
+      if (!name) return;
+      if (name.length > 12) {
+        setMsg("이름은 12자까지 넣을 수 있습니다.");
+        return;
+      }
+      if (!options.includes(name)) {
+        patch({ moneyLabels: { ...c.moneyLabels, [slot]: [...options, name] } });
+      }
+      setLabel(name);
+    };
+
+    return (
+      <select
+        className="label-pick"
+        value={current}
+        onChange={(ev) => onChange(ev.target.value)}
+      >
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+        <option value={ADD_NEW}>+ 추가하기</option>
+      </select>
+    );
+  };
 
   const imageRow = (label: string, hint: string, url: string, kind: ImgKind, index = -1) => {
     const key = kind === "cover" ? "cover" : `${kind}${index}`;
@@ -387,17 +448,7 @@ export default function EditPage() {
 
                   <div className="row three-money">
                     <div className="field">
-                      <select
-                        className="label-pick"
-                        value={e.supplyLabel || c.moneyLabels.supply[0] || ""}
-                        onChange={(ev) => patchEntry(i, { supplyLabel: ev.target.value })}
-                      >
-                        {c.moneyLabels.supply.map((o) => (
-                          <option key={o} value={o}>
-                            {o}
-                          </option>
-                        ))}
-                      </select>
+                      {labelPick("supply", i)}
                       <input
                         type="text"
                         inputMode="numeric"
@@ -407,17 +458,7 @@ export default function EditPage() {
                       />
                     </div>
                     <div className="field">
-                      <select
-                        className="label-pick"
-                        value={e.retailLabel || c.moneyLabels.retail[0] || ""}
-                        onChange={(ev) => patchEntry(i, { retailLabel: ev.target.value })}
-                      >
-                        {c.moneyLabels.retail.map((o) => (
-                          <option key={o} value={o}>
-                            {o}
-                          </option>
-                        ))}
-                      </select>
+                      {labelPick("retail", i)}
                       <input
                         type="text"
                         inputMode="numeric"
@@ -427,17 +468,7 @@ export default function EditPage() {
                       />
                     </div>
                     <div className="field">
-                      <select
-                        className="label-pick"
-                        value={e.marginLabel || c.moneyLabels.margin[0] || ""}
-                        onChange={(ev) => patchEntry(i, { marginLabel: ev.target.value })}
-                      >
-                        {c.moneyLabels.margin.map((o) => (
-                          <option key={o} value={o}>
-                            {o}
-                          </option>
-                        ))}
-                      </select>
+                      {labelPick("margin", i)}
                       <input
                         type="text"
                         inputMode="numeric"
@@ -478,8 +509,9 @@ export default function EditPage() {
           <fieldset>
             <legend>금액 이름 목록</legend>
             <p className="hint">
-              후기글의 금액 이름 드롭다운에 들어갈 항목입니다. 한 줄에 하나씩 적으면 그대로
-              선택지가 됩니다. 맨 위 항목이 새 후기글의 기본값입니다.
+              드롭다운에 들어 있는 이름들입니다. 후기글에서 <b>+ 추가하기</b> 로 넣은 이름도
+              여기에 쌓입니다. 이름을 고치거나 지우려면 여기서 하시고, 맨 위 항목이 새
+              후기글의 기본값입니다.
             </p>
             <div className="row three-money">
               {(
