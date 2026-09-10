@@ -1,4 +1,4 @@
-import type { Page } from "@/lib/types";
+import type { Entry, Page } from "@/lib/types";
 import { money, resolveMargin } from "@/lib/money";
 import ConsultForm from "./ConsultForm";
 import Figures from "./Figures";
@@ -22,11 +22,19 @@ function Prose({ text, className }: { text: string; className?: string }) {
   );
 }
 
-function Spec({ supply, retail, margin }: { supply: string; retail: string; margin: string }) {
+function Spec({ entry, labels }: { entry: Entry; labels: Page["moneyLabels"] }) {
+  // 후기글에서 고른 이름이 없으면 목록의 첫 항목을 쓴다
+  const name = (picked: string, list: string[], fallback: string) =>
+    picked || list[0] || fallback;
+
   const rows = [
-    { k: "공급가", v: money(supply) },
-    { k: "정가", v: money(retail) },
-    { k: "차액", v: resolveMargin(supply, retail, margin), accent: true },
+    { k: name(entry.supplyLabel, labels.supply, "공급가"), v: money(entry.supply) },
+    { k: name(entry.retailLabel, labels.retail, "정가"), v: money(entry.retail) },
+    {
+      k: name(entry.marginLabel, labels.margin, "차액"),
+      v: resolveMargin(entry.supply, entry.retail, entry.margin),
+      accent: true,
+    },
   ].filter((r) => r.v);
 
   if (!rows.length) return null;
@@ -74,7 +82,7 @@ export default function ReviewArticle({ page }: { page: Page }) {
                 brand={e.brand}
                 alt={e.title}
               />
-              <Spec supply={e.supply} retail={e.retail} margin={e.margin} />
+              <Spec entry={e} labels={page.moneyLabels} />
               <Prose text={e.body} />
             </section>
           ))}

@@ -51,6 +51,9 @@ function newEntry(): Entry {
     supply: "",
     retail: "",
     margin: "",
+    supplyLabel: "",
+    retailLabel: "",
+    marginLabel: "",
   };
 }
 
@@ -384,7 +387,17 @@ export default function EditPage() {
 
                   <div className="row three-money">
                     <div className="field">
-                      <label>공급가</label>
+                      <select
+                        className="label-pick"
+                        value={e.supplyLabel || c.moneyLabels.supply[0] || ""}
+                        onChange={(ev) => patchEntry(i, { supplyLabel: ev.target.value })}
+                      >
+                        {c.moneyLabels.supply.map((o) => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))}
+                      </select>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -394,7 +407,17 @@ export default function EditPage() {
                       />
                     </div>
                     <div className="field">
-                      <label>정가</label>
+                      <select
+                        className="label-pick"
+                        value={e.retailLabel || c.moneyLabels.retail[0] || ""}
+                        onChange={(ev) => patchEntry(i, { retailLabel: ev.target.value })}
+                      >
+                        {c.moneyLabels.retail.map((o) => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))}
+                      </select>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -404,7 +427,17 @@ export default function EditPage() {
                       />
                     </div>
                     <div className="field">
-                      <label>차액</label>
+                      <select
+                        className="label-pick"
+                        value={e.marginLabel || c.moneyLabels.margin[0] || ""}
+                        onChange={(ev) => patchEntry(i, { marginLabel: ev.target.value })}
+                      >
+                        {c.moneyLabels.margin.map((o) => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))}
+                      </select>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -439,6 +472,44 @@ export default function EditPage() {
             >
               + 후기글 추가
             </button>
+          </fieldset>
+
+          {/* ── 금액 이름 목록 ───────────────────────── */}
+          <fieldset>
+            <legend>금액 이름 목록</legend>
+            <p className="hint">
+              후기글의 금액 이름 드롭다운에 들어갈 항목입니다. 한 줄에 하나씩 적으면 그대로
+              선택지가 됩니다. 맨 위 항목이 새 후기글의 기본값입니다.
+            </p>
+            <div className="row three-money">
+              {(
+                [
+                  ["supply", "왼쪽 칸 (공급가 자리)"],
+                  ["retail", "가운데 칸 (정가 자리)"],
+                  ["margin", "오른쪽 칸 (차액 자리)"],
+                ] as const
+              ).map(([key, label]) => (
+                <div className="field" key={key}>
+                  <label htmlFor={`ml-${key}`}>{label}</label>
+                  <textarea
+                    id={`ml-${key}`}
+                    style={{ minHeight: 120 }}
+                    value={c.moneyLabels[key].join("\n")}
+                    onChange={(ev) =>
+                      patch({
+                        moneyLabels: {
+                          ...c.moneyLabels,
+                          [key]: ev.target.value
+                            .split("\n")
+                            .map((v) => v.trim())
+                            .filter(Boolean),
+                        },
+                      })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
           </fieldset>
 
           {/* ── 마무리 ────────────────────────────────── */}

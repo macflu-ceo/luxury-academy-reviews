@@ -8,11 +8,15 @@ export type Entry = {
   /** 판매 내역 사진 (주문서 캡처 등) */
   image: string;
   body: string;
-  /** 공급가 / 정가 / 마진. 셋 다 비우면 해당 후기에는 표시되지 않는다. */
+  /** 공급가 / 정가 / 차액. 셋 다 비우면 해당 후기에는 표시되지 않는다. */
   supply: string;
   retail: string;
   /** 비워두면 공급가와 정가로 자동 계산한다 */
   margin: string;
+  /** 금액 앞에 붙는 이름. 비우면 페이지 설정의 첫 번째 항목을 쓴다. */
+  supplyLabel: string;
+  retailLabel: string;
+  marginLabel: string;
 };
 
 export type Page = {
@@ -42,6 +46,8 @@ export type Page = {
     privacyText: string;
     doneText: string;
   };
+  /** 후기글에서 고를 수 있는 금액 이름 목록 */
+  moneyLabels: { supply: string[]; retail: string[]; margin: string[] };
   /** 휴대폰에서 하단 고정 버튼 노출 여부 */
   fixedCta: boolean;
   /** 맨 아래 표기 */
@@ -76,6 +82,9 @@ export const DEFAULT_PAGE: Page = {
       supply: "2450000",
       retail: "3900000",
       margin: "",
+      supplyLabel: "",
+      retailLabel: "",
+      marginLabel: "",
       body: "9년차 사무직이었습니다. 재고 부담이 무서워서 3개월을 고민하다 들어왔는데, 지금 돌아보면 그 3개월이 제일 아깝습니다.\n\n첫 달은 딱 3건 팔았습니다. 지인 두 명, 인스타 DM 한 명. 그런데 그 세 분이 전부 재구매를 하셨어요. 물건과 가격이 정직하면 고객이 먼저 다음을 물어본다는 걸 그때 배웠습니다.\n\n7월 정산 기준 매출 1,870만원입니다. 아직 본업은 그만두지 않았고, 하루에 쓰는 시간은 여전히 2시간 남짓입니다. 대신 그 2시간을 매일 지켰습니다.",
     },
     {
@@ -87,6 +96,9 @@ export const DEFAULT_PAGE: Page = {
       supply: "1780000",
       retail: "2690000",
       margin: "",
+      supplyLabel: "",
+      retailLabel: "",
+      marginLabel: "",
       body: "5년간 카페를 했습니다. 마지막 달 정산서를 보는데 매출은 나쁘지 않은데 남는 게 없더군요. 절반이 임대료와 인건비로 나갔고, 남은 재료는 버렸습니다.\n\n다시 장사를 한다면 재고와 고정비가 없는 걸 하겠다고 그때 정했습니다. 여기엔 그 세 가지가 없었습니다.\n\n거창한 준비는 없었어요. 카페 단골 명단을 정리하고 그분들이 어떤 브랜드를 좋아하는지 메모했습니다. 첫 주에 연락드린 분들 중 11명이 상담으로 이어졌고 4명이 구매했습니다.",
     },
     {
@@ -98,6 +110,9 @@ export const DEFAULT_PAGE: Page = {
       supply: "",
       retail: "",
       margin: "",
+      supplyLabel: "",
+      retailLabel: "",
+      marginLabel: "",
       body: "경력이 끊긴 지 6년이었습니다. 다시 일할 수 있을까 싶었는데, 제가 부족한 건 능력이 아니라 팔 수 있는 물건과 통로였더군요.\n\n밤 10시부터 11시. 제가 확보할 수 있는 유일한 시간이었습니다. 그 시간에 상품을 익히고, 사진을 올리고, 문의에 답했습니다.\n\n첫 달 정산금은 42만원이었습니다. 큰돈은 아니지만 6년 만에 제 이름으로 들어온 돈이었어요. 지금은 월 200~300만원 사이를 오갑니다. 육아 시간은 그대로 지키면서요.",
     },
   ],
@@ -118,6 +133,11 @@ export const DEFAULT_PAGE: Page = {
     ],
     privacyText: "상담 연락을 위한 개인정보 수집·이용에 동의합니다.",
     doneText: "신청이 접수됐습니다. 순서대로 연락드리겠습니다.",
+  },
+  moneyLabels: {
+    supply: ["공급가"],
+    retail: ["정가", "최근판매가", "즉시구매가", "온라인최저가"],
+    margin: ["차액", "마진"],
   },
   fixedCta: true,
   footer: "명품창업사관학교",
@@ -145,6 +165,9 @@ export function blankPage(): Page {
         supply: "",
         retail: "",
         margin: "",
+        supplyLabel: "",
+        retailLabel: "",
+        marginLabel: "",
       },
     ],
   };
