@@ -93,32 +93,57 @@ function normalize(raw: unknown): Page[] {
   return [DEFAULT_PAGE];
 }
 
+/**
+ * 인스턴스 메모리에 잠깐 들고 있는다. 방문자가 몰려도 저장소를 매번 읽지 않는다.
+ * 한 번이라도 제대로 읽었으면, 이후 읽기가 실패해도 그 내용을 계속 보여준다.
+ * 비상 화면(상담신청만)은 한 번도 읽지 못한 경우에만 나온다.
+ */
+const MEMO_MS = 15_000;
+let memo: { at: number; pages: Page[] } | null = null;
+
+async function readPagesOnce(): Promise<Page[] | null> {
+  const raw = useBlob()
+    ? await blobRead<unknown>(PAGES_KEY, null)
+    : await fileRead<unknown>("pages.json", null);
+  return raw ? normalize(raw) : null;
+}
+
 export async function getPages(): Promise<Page[]> {
-  // 배포 환경인데 저장소가 안 붙어 있으면 샘플 후기를 보여주면 안 된다.
-  // 실제 고객이 지어낸 후기를 읽게 된다.
+  if (memo && Date.now() - memo.at < MEMO_MS) return memo.pages;
+
   const isServerless = Boolean(process.env.VERCEL);
-  const onFailure = () => (isServerless ? [FALLBACK_PAGE] : [DEFAULT_PAGE]);
 
   if (isServerless && !useBlob()) {
     console.error("[store] BLOB_READ_WRITE_TOKEN 이 없습니다. 저장소가 연결되지 않았습니다.");
-    return onFailure();
+    return memo?.pages ?? [FALLBACK_PAGE];
   }
 
-  try {
-    const raw = useBlob()
-      ? await blobRead<unknown>(PAGES_KEY, null)
-      : await fileRead<unknown>("pages.json", null);
-    if (!raw) return isServerless ? onFailure() : [DEFAULT_PAGE];
-    return normalize(raw);
-  } catch (e) {
-    console.error("[store] 후기 페이지를 불러오지 못했습니다:", e);
-    return onFailure();
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const pages = await readPagesOnce();
+      if (pages) {
+        memo = { at: Date.now(), pages };
+        return pages;
+      }
+      break; // 저장된 파일 자체가 없음
+    } catch (e) {
+      console.error(`[store] 후기 페이지 읽기 실패 (${attempt}/3):`, e);
+      if (attempt < 3) await new Promise((r) => setTimeout(r, 250 * attempt));
+    }
   }
+
+  if (memo) {
+    // 읽기는 실패했지만 직전 정상 내용이 있다. 비상 화면으로 떨어지지 않는다.
+    memo = { at: Date.now(), pages: memo.pages };
+    return memo.pages;
+  }
+  return isServerless ? [FALLBACK_PAGE] : [DEFAULT_PAGE];
 }
 
 export async function savePages(pages: Page[]): Promise<void> {
   if (useBlob()) await blobWrite(PAGES_KEY, pages);
   else await fileWrite("pages.json", pages);
+  memo = { at: Date.now(), pages };
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {

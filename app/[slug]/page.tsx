@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import { getPageBySlug } from "@/lib/store";
 import ReviewArticle from "../components/ReviewArticle";
 
-// 방문자마다 저장소를 읽으면 트래픽이 몰릴 때 저장소 한도부터 터진다.
-// 60초 캐시: 어드민에서 고치면 최대 1분 뒤에 반영된다.
-export const revalidate = 60;
+// 페이지 캐시(ISR)를 쓰면 백그라운드 갱신 중 저장소 읽기가 막혀 비상 화면이 캐시된다.
+// 매 요청 렌더하고, 저장소 읽기는 lib/store.ts 의 메모리 캐시로 줄인다.
+export const dynamic = "force-dynamic";
 
 type Props = { params: { slug: string } };
 

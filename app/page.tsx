@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import { getLatestPage } from "@/lib/store";
 import ReviewArticle from "./components/ReviewArticle";
 
-export const revalidate = 60;
+// 페이지 캐시(ISR)를 쓰면 백그라운드 갱신 중 저장소 읽기가 막혀 비상 화면이 캐시된다.
+// 매 요청 렌더하고, 저장소 읽기는 lib/store.ts 의 메모리 캐시로 줄인다.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const page = await getLatestPage();
