@@ -21,26 +21,42 @@ function useBlob(): boolean {
 
 /* ────────────── Vercel Blob ────────────── */
 
+/** 저장할 때마다 새 파일이 생긴다. 최근 몇 개는 지우지 않고 남겨 둔다. */
+const KEEP_VERSIONS = 20;
+
 async function blobRead<T>(prefix: string, fallback: T): Promise<T> {
-  const { blobs } = await list({ prefix, limit: 100 });
+  const { blobs } = await list({ prefix, limit: 1000 });
   if (!blobs.length) return fallback;
-  const latest = [...blobs].sort(
+
+  // 페이지 쪽은 파일 목록이 잠깐 캐시될 수 있어서, 가장 새 파일이 이미 지워졌을 수 있다.
+  // 읽히는 것이 나올 때까지 새것부터 차례로 시도한다.
+  const sorted = [...blobs].sort(
     (a, b) => +new Date(b.uploadedAt) - +new Date(a.uploadedAt),
-  )[0];
-  const res = await fetch(latest.url, { cache: "no-store" });
-  if (!res.ok) return fallback;
-  return (await res.json()) as T;
+  );
+  for (const b of sorted) {
+    try {
+      const res = await fetch(b.url, { cache: "no-store" });
+      if (res.ok) return (await res.json()) as T;
+    } catch {
+      // 다음 파일로
+    }
+  }
+  // 파일은 있는데 하나도 못 읽었다. 빈 값으로 넘기면 상담신청 목록을 덮어써 버리므로 멈춘다.
+  throw new Error(`[store] ${prefix}: 파일 ${sorted.length}개를 모두 읽지 못했습니다.`);
 }
 
 async function blobWrite(prefix: string, value: unknown): Promise<void> {
-  const { blobs } = await list({ prefix, limit: 100 });
   await put(`${prefix}.json`, JSON.stringify(value), {
     access: "public",
     addRandomSuffix: true,
     contentType: "application/json",
   });
-  // 새 파일을 쓴 뒤에 이전 파일을 지운다 (중간에 실패해도 데이터가 남도록)
-  if (blobs.length) await del(blobs.map((b) => b.url)).catch(() => {});
+  // 바로 지우면 캐시된 목록이 지워진 파일을 가리켜 페이지가 깨진다. 오래된 것만 정리한다.
+  const { blobs } = await list({ prefix, limit: 1000 });
+  const stale = [...blobs]
+    .sort((a, b) => +new Date(b.uploadedAt) - +new Date(a.uploadedAt))
+    .slice(KEEP_VERSIONS);
+  if (stale.length) await del(stale.map((b) => b.url)).catch(() => {});
 }
 
 /* ────────────── 로컬 파일 ────────────── */
