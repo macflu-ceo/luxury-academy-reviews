@@ -10,6 +10,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { del, list, put } from "@vercel/blob";
+import { appendConsultsToSheet } from "./sheets";
 import { Consult, DEFAULT_PAGE, FALLBACK_PAGE, Page } from "./types";
 
 const PAGES_KEY = "reviews/data/pages";
@@ -185,14 +186,25 @@ export async function listConsults(): Promise<Consult[]> {
 export async function addConsult(c: Consult): Promise<boolean> {
   // 저장 성공 여부와 무관하게 먼저 로그로 남긴다
   console.error("[LEAD]", JSON.stringify(c));
+
+  // 시트는 보기용 사본. 원본 저장과 따로 돌리고, 실패해도 접수에는 영향이 없다.
+  // 원본 저장이 실패해도 시트에는 남으니 두 번째 안전망도 된다.
+  const toSheet = appendConsultsToSheet([c]).catch((e) =>
+    console.error("[sheets] 시트 기록 실패:", e),
+  );
+
+  let stored = false;
   try {
     const all = await listConsults();
     all.push(c);
     if (useBlob()) await blobWrite(CONSULT_KEY, all);
     else await fileWrite("consults.json", all);
-    return true;
+    stored = true;
   } catch (e) {
     console.error("[store] 상담신청을 저장하지 못했습니다:", e);
-    return false;
   }
+
+  // 시트가 느려도 신청자를 5초 넘게 붙잡지 않는다
+  await Promise.race([toSheet, new Promise((r) => setTimeout(r, 5000))]);
+  return stored;
 }

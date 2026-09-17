@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { listConsults } from "@/lib/store";
+import { sheetUrl } from "@/lib/sheets";
+import SheetSync from "./SheetSync";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,7 @@ export default async function ConsultsPage() {
             <p>최근 신청이 위에 옵니다. 신청 시각은 한국 시간 기준입니다.</p>
           </div>
           <div className="admin-actions">
+            <SheetSync url={sheetUrl()} />
             <Link className="btn" href="/admin">
               후기 페이지 목록
             </Link>
