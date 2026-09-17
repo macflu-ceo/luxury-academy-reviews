@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { shareImage } from "@/lib/types";
 import type { Page } from "@/lib/types";
 
 export default function AdminHome() {
@@ -100,9 +101,9 @@ export default function AdminHome() {
               <div className="page-card" key={p.id}>
                 <Link className="page-card-main" href={`/admin/pages/${p.id}`}>
                   <div className="thumb">
-                    {p.cover ? (
+                    {shareImage(p) ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.cover} alt="" />
+                      <img src={shareImage(p)} alt="" />
                     ) : (
                       <span>사진 없음</span>
                     )}

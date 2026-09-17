@@ -34,6 +34,8 @@ export type Page = {
   lead: string;
   /** 대표 사진 URL */
   cover: string;
+  /** 링크 공유(카톡·문자) 미리보기 썸네일. 페이지 본문에는 나오지 않는다. */
+  ogImage: string;
   /** 후기글 목록 (제목 + 사진 + 내용) */
   entries: Entry[];
   /** 글 맨 아래 마무리 문구 */
@@ -72,6 +74,7 @@ export const DEFAULT_PAGE: Page = {
   title: "명품창업사관학교 후기",
   lead: "이번 달에 새로 시작하신 분들의 이야기를 모았습니다. 홍보용으로 다듬지 않고, 시작한 날부터 지금까지 있었던 일을 그대로 옮겼습니다.",
   cover: "",
+  ogImage: "",
   entries: [
     {
       id: "e1",
@@ -200,3 +203,20 @@ export const FALLBACK_PAGE: Page = {
   closing: { headline: "", body: "", ctaLabel: "" },
   fixedCta: false,
 };
+
+/**
+ * 링크 미리보기에 쓸 이미지.
+ * 공유 썸네일 → 대표 사진 → 후기글의 첫 상품 사진 순으로 고른다.
+ * 판매 내역 캡처는 표 모양이라 미리보기로 쓰면 보기 흉해서 고르지 않는다.
+ */
+export function shareImage(p: Page): string {
+  if (p.ogImage) return p.ogImage;
+  if (p.cover) return p.cover;
+  return p.entries.find((e) => e.productImage)?.productImage || "";
+}
+
+/** 미리보기 설명. 소개글을 한 줄로 펴고 적당히 자른다. */
+export function shareDescription(p: Page): string {
+  const flat = (p.lead || "").replace(/\s*\n\s*-\s*\n\s*/g, " ").replace(/\s+/g, " ").trim();
+  return flat.length > 110 ? `${flat.slice(0, 108)}…` : flat;
+}

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { shareImage } from "@/lib/types";
 import type { Entry, Page } from "@/lib/types";
 import { resolveMargin } from "@/lib/money";
 
-type ImgKind = "cover" | "product" | "receipt";
+type ImgKind = "cover" | "og" | "product" | "receipt";
 
 /** 드롭다운 맨 아래 '+ 추가하기' 항목을 가리키는 값 */
 const ADD_NEW = "__add__";
@@ -119,7 +120,7 @@ export default function EditPage() {
     const target = fileTarget.current;
     if (!file || !target) return;
 
-    setUploading(target.kind === "cover" ? "cover" : `${target.kind}${target.index}`);
+    setUploading(target.index < 0 ? target.kind : `${target.kind}${target.index}`);
     setMsg("");
     try {
       const fd = new FormData();
@@ -128,6 +129,7 @@ export default function EditPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "사진을 올리지 못했습니다.");
       if (target.kind === "cover") patch({ cover: data.url });
+      else if (target.kind === "og") patch({ ogImage: data.url });
       else if (target.kind === "product") patchEntry(target.index, { productImage: data.url });
       else patchEntry(target.index, { image: data.url });
     } catch (err) {
@@ -237,7 +239,7 @@ export default function EditPage() {
   };
 
   const imageRow = (label: string, hint: string, url: string, kind: ImgKind, index = -1) => {
-    const key = kind === "cover" ? "cover" : `${kind}${index}`;
+    const key = index < 0 ? kind : `${kind}${index}`;
     return (
       <div className="field">
         <label>{label}</label>
@@ -265,7 +267,9 @@ export default function EditPage() {
                   onClick={() =>
                     kind === "cover"
                       ? patch({ cover: "" })
-                      : patchEntry(index, kind === "product" ? { productImage: "" } : { image: "" })
+                      : kind === "og"
+                        ? patch({ ogImage: "" })
+                        : patchEntry(index, kind === "product" ? { productImage: "" } : { image: "" })
                   }
                 >
                   제거
@@ -378,6 +382,19 @@ export default function EditPage() {
                 <span className="sub">빈 줄 하나를 넣으면 문단이 나뉩니다.</span>
               </div>
               {imageRow("대표 사진", "글 맨 위에 크게 들어갑니다 · 8MB 이하", c.cover, "cover")}
+              {imageRow(
+                "공유 썸네일",
+                "카톡·문자로 링크를 보냈을 때 미리보기에 나옵니다 · 페이지에는 안 나옴 · 가로형 1200×630 권장",
+                c.ogImage,
+                "og",
+              )}
+              <p className="sub" style={{ margin: "-6px 0 0", fontSize: ".6875rem", color: "var(--ink-3)" }}>
+                {c.ogImage
+                  ? "공유 썸네일이 미리보기로 나갑니다."
+                  : shareImage(c)
+                    ? "공유 썸네일이 비어 있어 대표 사진이나 첫 후기의 상품 사진이 대신 나갑니다."
+                    : "미리보기에 쓸 사진이 없습니다. 공유 썸네일을 올려주세요."}
+              </p>
             </div>
           </fieldset>
 
