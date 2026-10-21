@@ -75,6 +75,8 @@ export default function ReviewArticle({ page }: { page: Page }) {
         ) : null}
 
         <div className="page">
+          <VideoEmbed url={page.video} caption={page.videoCaption} />
+
           {page.entries.filter(hasContent).map((e) => (
             <section className="entry" key={e.id}>
               {e.title ? <h2>{e.title}</h2> : null}
@@ -88,8 +90,6 @@ export default function ReviewArticle({ page }: { page: Page }) {
               <Prose text={e.body} />
             </section>
           ))}
-
-          <VideoEmbed url={page.video} caption={page.videoCaption} />
 
           {page.closing.headline || page.closing.body ? (
             <section className="closing">
