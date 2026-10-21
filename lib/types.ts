@@ -232,3 +232,20 @@ export function shareDescription(p: Page): string {
   const flat = (p.lead || "").replace(/\s*\n\s*-\s*\n\s*/g, " ").replace(/\s+/g, " ").trim();
   return flat.length > 110 ? `${flat.slice(0, 108)}…` : flat;
 }
+
+/**
+ * 화면에 내보낼 내용이 있는 후기글인지.
+ * 새 페이지는 빈 후기글 한 칸으로 시작하는데, 그대로 그리면 글은 없고
+ * 위아래 여백만 남아 큰 공백이 된다.
+ */
+export function hasContent(e: Entry): boolean {
+  return Boolean(
+    e.title.trim() ||
+      e.body.trim() ||
+      e.productImage ||
+      e.image ||
+      e.supply.trim() ||
+      e.retail.trim() ||
+      e.margin.trim(),
+  );
+}

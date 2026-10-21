@@ -1,3 +1,4 @@
+import { hasContent } from "@/lib/types";
 import type { Entry, Page } from "@/lib/types";
 import { money, resolveMargin } from "@/lib/money";
 import ConsultForm from "./ConsultForm";
@@ -74,7 +75,7 @@ export default function ReviewArticle({ page }: { page: Page }) {
         ) : null}
 
         <div className="page">
-          {page.entries.map((e) => (
+          {page.entries.filter(hasContent).map((e) => (
             <section className="entry" key={e.id}>
               {e.title ? <h2>{e.title}</h2> : null}
               <Figures
