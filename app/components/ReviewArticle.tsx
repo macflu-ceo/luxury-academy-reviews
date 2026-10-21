@@ -88,6 +88,8 @@ export default function ReviewArticle({ page }: { page: Page }) {
             </section>
           ))}
 
+          <VideoEmbed url={page.video} caption={page.videoCaption} />
+
           {page.closing.headline || page.closing.body ? (
             <section className="closing">
               {page.closing.headline ? <h2>{page.closing.headline}</h2> : null}
@@ -99,8 +101,6 @@ export default function ReviewArticle({ page }: { page: Page }) {
               ) : null}
             </section>
           ) : null}
-
-          <VideoEmbed url={page.video} caption={page.videoCaption} />
 
           <ConsultForm form={page.form} pageSlug={page.slug} />
 
