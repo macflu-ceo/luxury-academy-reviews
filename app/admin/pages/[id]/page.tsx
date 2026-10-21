@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { shareImage } from "@/lib/types";
+import { parseVideo } from "@/lib/video";
 import type { Entry, Page } from "@/lib/types";
 import { resolveMargin } from "@/lib/money";
 
@@ -558,6 +559,44 @@ export default function EditPage() {
                   />
                 </div>
               ))}
+            </div>
+          </fieldset>
+
+          {/* ── 영상 ──────────────────────────────────── */}
+          <fieldset>
+            <legend>영상</legend>
+            <p className="hint">
+              문의 폼 바로 위에 영상이 들어갑니다. 영상을 보다가 바로 아래에 문의를 남길 수
+              있고, 문의를 보내도 영상은 끊기지 않습니다. 비워두면 영상 칸이 안 나옵니다.
+            </p>
+            <div className="row">
+              <div className="field">
+                <label htmlFor="video">영상 주소</label>
+                <input
+                  id="video"
+                  type="text"
+                  value={c.video}
+                  placeholder="https://youtu.be/XXXXXXXXXXX"
+                  onChange={(e) => patch({ video: e.target.value })}
+                />
+                <span className="sub">
+                  {c.video.trim()
+                    ? parseVideo(c.video)
+                      ? `${parseVideo(c.video)!.provider === "youtube" ? "유튜브" : "비메오"} 영상으로 인식했습니다.`
+                      : "주소를 알아보지 못했습니다. 유튜브나 비메오 주소를 넣어주세요."
+                    : "유튜브 주소를 그대로 붙여넣으면 됩니다 (일반·공유·쇼츠 주소 모두 가능)."}
+                </span>
+              </div>
+              <div className="field">
+                <label htmlFor="videoCaption">영상 아래 한 줄 설명</label>
+                <input
+                  id="videoCaption"
+                  type="text"
+                  value={c.videoCaption}
+                  placeholder="예) 2분 영상으로 먼저 확인해 보세요"
+                  onChange={(e) => patch({ videoCaption: e.target.value })}
+                />
+              </div>
             </div>
           </fieldset>
 

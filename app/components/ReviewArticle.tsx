@@ -1,6 +1,7 @@
 import type { Entry, Page } from "@/lib/types";
 import { money, resolveMargin } from "@/lib/money";
 import ConsultForm from "./ConsultForm";
+import VideoEmbed from "./VideoEmbed";
 import Figures from "./Figures";
 
 function Prose({ text, className }: { text: string; className?: string }) {
@@ -98,6 +99,8 @@ export default function ReviewArticle({ page }: { page: Page }) {
               ) : null}
             </section>
           ) : null}
+
+          <VideoEmbed url={page.video} caption={page.videoCaption} />
 
           <ConsultForm form={page.form} pageSlug={page.slug} />
 

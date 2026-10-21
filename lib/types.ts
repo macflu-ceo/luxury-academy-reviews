@@ -1,3 +1,5 @@
+import { parseVideo } from "./video";
+
 export type Entry = {
   id: string;
   title: string;
@@ -36,6 +38,10 @@ export type Page = {
   cover: string;
   /** 링크 공유(카톡·문자) 미리보기 썸네일. 페이지 본문에는 나오지 않는다. */
   ogImage: string;
+  /** 문의 폼 바로 위에 넣을 영상 주소 (유튜브·비메오). 비우면 영상 칸이 안 나온다. */
+  video: string;
+  /** 영상 아래 한 줄 설명 */
+  videoCaption: string;
   /** 후기글 목록 (제목 + 사진 + 내용) */
   entries: Entry[];
   /** 글 맨 아래 마무리 문구 */
@@ -75,6 +81,8 @@ export const DEFAULT_PAGE: Page = {
   lead: "이번 달에 새로 시작하신 분들의 이야기를 모았습니다. 홍보용으로 다듬지 않고, 시작한 날부터 지금까지 있었던 일을 그대로 옮겼습니다.",
   cover: "",
   ogImage: "",
+  video: "",
+  videoCaption: "",
   entries: [
     {
       id: "e1",
@@ -212,6 +220,8 @@ export const FALLBACK_PAGE: Page = {
 export function shareImage(p: Page): string {
   if (p.ogImage) return p.ogImage;
   if (p.cover) return p.cover;
+  const thumb = parseVideo(p.video)?.thumbnail;
+  if (thumb) return thumb;
   return p.entries.find((e) => e.productImage)?.productImage || "";
 }
 

@@ -54,7 +54,8 @@ export default function ConsultForm({ form, pageSlug }: Props) {
       // 신청이 끝났으니 더 권하는 문구와 버튼은 걷어낸다
       document.body.classList.add("consult-done");
       requestAnimationFrame(() =>
-        document.getElementById("consult")?.scrollIntoView({ block: "center" }),
+        // nearest: 이미 보이면 움직이지 않는다. 위에 있는 영상이 밀려나지 않게.
+        document.getElementById("consult")?.scrollIntoView({ block: "nearest" }),
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "잠시 후 다시 시도해 주세요.");
